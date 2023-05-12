@@ -3,9 +3,11 @@ import User from '../models/User';
 class UserController {
   async store(req, res) {
     try {
-      const novoUser = await User.create(req.body);
+      const { id, nome, email } = await User.create(req.body);
       return res.json({
-        novoUser,
+        id,
+        nome,
+        email,
       });
     } catch (err) {
       return res.status(400).json({
@@ -14,13 +16,59 @@ class UserController {
     }
   }
 
+  // Update
+
+  async update(req, res) {
+    try {
+      const user = await User.findByPk(req.userId);
+
+      if (!user) {
+        return res.status(400).json({
+          errors: ['Usuário não exister'],
+        });
+      }
+
+      const { id, nome, email } = await user.update(req.body);
+      return res.json({
+        id,
+        nome,
+        email,
+      });
+    } catch (err) {
+      return res.json(null);
+    }
+  }
+
+  // Delete
+
+  async delete(req, res) {
+    try {
+      const user = await User.findByPk(req.userId);
+
+      if (!user) {
+        return res.status(400).json({
+          errors: ['Usuário não exister'],
+        });
+      }
+
+      const { id, nome, email } = await user.destroy();
+      return res.json({
+        id,
+        nome,
+        email,
+      });
+    } catch (err) {
+      return res.json(null);
+    }
+  }
+
   // Index
 
   async index(req, res) {
     try {
-      console.log('User ID: ', req.userId);
-      console.log('User Email: ', req.userEmail);
-      const users = await User.findAll();
+      const users = await User.findAll({
+        attributes: ['id', 'nome', 'email'],
+      });
       return res.json(users);
     } catch (err) {
       return res.json(null);
@@ -31,56 +79,15 @@ class UserController {
 
   async show(req, res) {
     try {
-      const user = await User.findByPk(req.params.id);
-      return res.json(user);
-    } catch (err) {
-      return res.json(null);
-    }
-  }
+      const user = await User.findByPk(req.userId);
 
-  // Update
+      const { id, nome, email } = user;
 
-  async update(req, res) {
-    try {
-      if (!req.params.id) {
-        return res.status(400).json({
-          errors: ['ID não enviado.'],
-        });
-      }
-      const user = await User.findByPk(req.params.id);
-
-      if (!user) {
-        return res.status(400).json({
-          errors: ['Usuário não exister'],
-        });
-      }
-
-      const novosDados = await user.update(req.body);
-      return res.json(novosDados);
-    } catch (err) {
-      return res.json(null);
-    }
-  }
-
-  // Delete
-
-  async delete(req, res) {
-    try {
-      if (!req.params.id) {
-        return res.status(400).json({
-          errors: ['ID não enviado.'],
-        });
-      }
-      const user = await User.findByPk(req.params.id);
-
-      if (!user) {
-        return res.status(400).json({
-          errors: ['Usuário não exister'],
-        });
-      }
-
-      await user.destroy();
-      return res.json(user);
+      return res.json({
+        id,
+        nome,
+        email,
+      });
     } catch (err) {
       return res.json(null);
     }
